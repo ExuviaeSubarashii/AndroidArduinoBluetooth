@@ -38,6 +38,7 @@ public class BluetoothConnectionService {
     private ParcelUuid[] deviceUUID;
     ProgressDialog mProgressDialog;
     private ConnectedThread mConnectedThread;
+    static InputStream mmInStream;
     public BluetoothConnectionService(Context context) {
         mContext = context;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -205,7 +206,7 @@ public class BluetoothConnectionService {
      **/
     public class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
-        final InputStream mmInStream;
+
         private final OutputStream mmOutStream;
 
         public  BluetoothSocket socket;
@@ -244,9 +245,13 @@ public class BluetoothConnectionService {
                     bytes = mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
-                } catch (IOException e) {
+                    Thread.sleep(1000);
+                }
+                catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
                     break;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
 
