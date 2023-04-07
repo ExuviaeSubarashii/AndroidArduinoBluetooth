@@ -179,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         }
     };
+    @SuppressLint("MissingPermission")
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: called.");
@@ -187,9 +188,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         unregisterReceiver(mBroadcastReceiver2);
         unregisterReceiver(mBroadcastReceiver3);
         unregisterReceiver(mBroadcastReceiver4);
-        //mBluetoothAdapter.cancelDiscovery();
+        mBluetoothAdapter.cancelDiscovery();
     }
 
+    @SuppressLint("SuspiciousIndentation")
     public void DrawGraph()
     {
         ArrayList<Entry> yValues=new ArrayList<Entry>();
@@ -199,11 +201,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         try {
             bytes = BluetoothConnectionService.mmInStream.read(buffer);
             incomingMessage = new String(buffer, 0, bytes);
-            /*for (int i=0; i<100; i++)
-            {*/
                 yValues.add(new Entry(0,Float.parseFloat(incomingMessage)));
-            //}
-            LineDataSet set1=new LineDataSet(yValues,"DataSet1");
+            LineDataSet set1=new LineDataSet(yValues,"NabizGraph");
             set1.setFillAlpha(110);
             ArrayList<ILineDataSet> dataSets=new ArrayList<>();
             dataSets.add(set1);
@@ -266,8 +265,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     String incomingMessage = new String(buffer, 0, bytes);
                     nabizLabel.setText("Nabziniz: "+incomingMessage);
                     System.out.println(incomingMessage);
+                    Thread.sleep(1000);
                     DrawGraph();
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }

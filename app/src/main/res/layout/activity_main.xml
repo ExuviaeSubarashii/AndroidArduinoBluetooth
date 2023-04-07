@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
     <Button
-        android:text="ON/OFF"
+        android:text="BLUETOOTH'U AÇ/KAPA"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -15,7 +15,7 @@
         android:id="@+id/btnONOFF"/>
 
     <Button
-        android:text="Enable Discoverable"
+        android:text="AYGITI TARANABİLİR YAP"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnDiscoverable_on_off"
@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnFindUnpairedDevices"
-        android:text="Discover"
+        android:text="YAKINDAKİ AYGITLARI TARA"
         android:onClick="btnDiscover"/>
 
     <ListView
@@ -42,12 +42,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/btnFindUnpairedDevices"
         android:id="@+id/btnStartConnection"
-        android:text="Start Connection"/>
+        android:text="SEÇİLİ AYGITLA BAĞLANTIYI BAŞLAT"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnReceiveData"
-        android:text="ReceiveData"/>
+        android:text="NABIZ VERİSİNİ AL"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
