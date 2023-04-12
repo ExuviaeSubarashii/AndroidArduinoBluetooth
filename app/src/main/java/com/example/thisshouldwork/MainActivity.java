@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     Button btnReceiveNabizData;
     public TextView isconnectedlabel;
     LineChart nabizGraph;
+    Button drawGraphButton;
     List<Entry> entries=new ArrayList<Entry>();
 
     public InputStream inputStream;
@@ -232,9 +233,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         btnReceiveNabizData= findViewById(R.id.btnReceiveData);
         isconnectedlabel=findViewById(R.id.isconnectedlabel);
         nabizGraph=findViewById(R.id.nabizChart);
+        drawGraphButton=findViewById(R.id.btnDrawGraph);
         nabizGraph.setDragEnabled(true);
         nabizGraph.setScaleEnabled(false);
-
         btnONOFF.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
             @Override
@@ -243,7 +244,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 enableDisableBT();
             }
         });
-
+        drawGraphButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DrawGraph();
+            }
+        });
         btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -265,16 +271,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     String incomingMessage = new String(buffer, 0, bytes);
                     nabizLabel.setText("Nabziniz: "+incomingMessage);
                     System.out.println(incomingMessage);
-                    Thread.sleep(1000);
-                    DrawGraph();
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
         });
     }
+
     //create method for starting connection
-//***remember the conncction will fail and app will crash if you haven't paired first
+//***remember the connection will fail and app will crash if you haven't paired first
 
     public void startConnection(){
         startBTConnection(mBTDevice,mDeviceUUIDs);
