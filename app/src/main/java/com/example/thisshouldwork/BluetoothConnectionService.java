@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -22,7 +22,6 @@ import java.util.UUID;
  */
 
 public class BluetoothConnectionService {
-    public MainActivity MA;
     private static final String TAG = "BluetoothConnectionServ";
 
     private static final String appName = "THISSHOULDWORK";
@@ -35,10 +34,11 @@ public class BluetoothConnectionService {
     private AcceptThread mInsecureAcceptThread;
     public ConnectThread mConnectThread;
     private BluetoothDevice mmDevice;
-    private ParcelUuid[] deviceUUID;
+    ParcelUuid[] deviceUUID;
     ProgressDialog mProgressDialog;
     private ConnectedThread mConnectedThread;
     static InputStream mmInStream;
+    static ArrayList<String> IncomingStringMessage=new ArrayList<>();
     public BluetoothConnectionService(Context context) {
         mContext = context;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -237,21 +237,22 @@ public class BluetoothConnectionService {
         public void run(){
             byte[] buffer = new byte[1024];  // buffer store for the stream
             int bytes; // bytes returned from read()
-
             // Keep listening to the InputStream until an exception occurs
             while (true) {
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 // Read from the InputStream
                 try {
                     bytes = mmInStream.read(buffer);
-                    String incomingMessage = new String(buffer, 0, bytes);
+                    String incomingMessage = new String(buffer,0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
-                    Thread.sleep(1000);
                 }
                 catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
                     break;
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
                 }
             }
 

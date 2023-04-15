@@ -8,37 +8,25 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.github.mikephil.charting.listener.OnChartGestureListener;
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 
@@ -57,13 +45,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public TextView isconnectedlabel;
     LineChart nabizGraph;
     Button drawGraphButton;
-    List<Entry> entries=new ArrayList<Entry>();
+    List<Entry> entries=new ArrayList<>();
 
     public InputStream inputStream;
-
-    public BluetoothConnectionService.ConnectThread BCS;
-    public BluetoothConnectionService.ConnectedThread BCS2;
-
     ParcelUuid[] mDeviceUUIDs;
 
     private static final UUID MY_UUID_INSECURE =
@@ -195,23 +179,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @SuppressLint("SuspiciousIndentation")
     public void DrawGraph()
     {
-        ArrayList<Entry> yValues=new ArrayList<Entry>();
-        byte[] buffer = new byte[1024];  // buffer store for the stream
-        int bytes; // bytes returned from read()
-        String incomingMessage;
-        try {
-            bytes = BluetoothConnectionService.mmInStream.read(buffer);
-            incomingMessage = new String(buffer, 0, bytes);
-                yValues.add(new Entry(0,Float.parseFloat(incomingMessage)));
-            LineDataSet set1=new LineDataSet(yValues,"NabizGraph");
-            set1.setFillAlpha(110);
-            ArrayList<ILineDataSet> dataSets=new ArrayList<>();
-            dataSets.add(set1);
-            LineData data=new LineData(dataSets);
-            nabizGraph.setData(data);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
     }
     @SuppressLint("SetTextI18n")
@@ -247,7 +214,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         drawGraphButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DrawGraph();
+                ArrayList<Entry> yValues=new ArrayList<Entry>();
+                byte[] buffer = new byte[1024];  // buffer store for the stream
+                int bytes; // bytes returned from read()
+                String incomingMessage;
+                try {
+                    bytes = BluetoothConnectionService.mmInStream.read(buffer);
+                    incomingMessage = new String(buffer, 0, bytes);
+                    yValues.add(new Entry(0,Float.parseFloat(incomingMessage)));
+                    LineDataSet set1=new LineDataSet(yValues,"NabizGraph");
+                    set1.setFillAlpha(110);
+                    ArrayList<ILineDataSet> dataSets=new ArrayList<>();
+                    dataSets.add(set1);
+                    LineData data=new LineData(dataSets);
+                    nabizGraph.setData(data);
+                    nabizGraph.invalidate();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         btnStartConnection.setOnClickListener(new View.OnClickListener() {
@@ -270,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     bytes = BluetoothConnectionService.mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     nabizLabel.setText("Nabziniz: "+incomingMessage);
-                    System.out.println(incomingMessage);
+                    System.out.println(incomingMessage/*.concat(incomingMessage)*/);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
