@@ -1,5 +1,8 @@
 package com.example.thisshouldwork;
 
+import static java.lang.Thread.getAllStackTraces;
+import static java.lang.Thread.sleep;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -8,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelUuid;
@@ -19,6 +23,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.LimitLine;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -26,6 +32,8 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -218,20 +226,68 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 byte[] buffer = new byte[1024];  // buffer store for the stream
                 int bytes; // bytes returned from read()
                 String incomingMessage;
-                try {
-                    bytes = BluetoothConnectionService.mmInStream.read(buffer);
-                    incomingMessage = new String(buffer, 0, bytes);
-                    yValues.add(new Entry(0,Float.parseFloat(incomingMessage)));
-                    LineDataSet set1=new LineDataSet(yValues,"NabizGraph");
-                    set1.setFillAlpha(110);
-                    ArrayList<ILineDataSet> dataSets=new ArrayList<>();
-                    dataSets.add(set1);
-                    LineData data=new LineData(dataSets);
-                    nabizGraph.setData(data);
-                    nabizGraph.invalidate();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                LimitLine upper_limit=new LimitLine(200f,"Upper Limit");
+                upper_limit.setLineWidth(4f);
+                upper_limit.enableDashedLine(10f,10f,0);
+                upper_limit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
+                upper_limit.setTextSize(15f);
+
+                LimitLine lower_limit=new LimitLine(0f,"Lower Limit");
+                lower_limit.setLineWidth(4f);
+                lower_limit.enableDashedLine(10f,10f,0);
+                lower_limit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
+                lower_limit.setTextSize(15f);
+
+                YAxis leftAxis=nabizGraph.getAxisLeft();
+                leftAxis.removeAllLimitLines();
+                leftAxis.addLimitLine(upper_limit);
+                leftAxis.addLimitLine(lower_limit);
+
+                leftAxis.setAxisMaximum(200f);
+                leftAxis.setAxisMinimum(0f);
+
+                leftAxis.enableGridDashedLine(10f,10f,0);
+                leftAxis.setDrawLimitLinesBehindData(true);
+
+                ArrayList<Integer> messagearray=new ArrayList<>();
+                ArrayList<ILineDataSet> dataSets=new ArrayList<>();
+                yValues.add(new Entry(0,0));
+                nabizGraph.getAxisRight().setEnabled(false);
+                    try {
+                        bytes = BluetoothConnectionService.mmInStream.read(buffer);
+                        incomingMessage = new String(buffer, 0, bytes);
+                        for (int i=0; i<5;i++)
+                        {
+                            try
+                            {
+                                Integer g= Integer.parseInt(incomingMessage.trim());
+                                messagearray.add(g);
+                            } catch (NumberFormatException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                            for (Integer ar:messagearray)
+                            {
+                                yValues.add(new Entry(1,ar ));
+                                yValues.add(new Entry(2, ar));
+                                yValues.add(new Entry(3, ar));
+                                yValues.add(new Entry(4, ar));
+                                    /*yValues.add(new Entry(1,40 ));
+                                    yValues.add(new Entry(2, 20));
+                                    yValues.add(new Entry(3, 60));
+                                    yValues.add(new Entry(4, 100));*/
+                            }
+                        LineDataSet set1=new LineDataSet(yValues,"NabizGraph");
+                        dataSets.add(set1);
+                        LineData data=new LineData(dataSets);
+                        nabizGraph.setData(data);
+                        nabizGraph.invalidate();
+                        set1.setFillAlpha(110);
+                        set1.setColor(Color.RED);
+                        set1.setLineWidth(3f);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
             }
         });
         btnStartConnection.setOnClickListener(new View.OnClickListener() {
@@ -250,15 +306,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onClick(View view) {
                 byte[] buffer = new byte[1024];  // buffer store for the stream
                 int bytes; // bytes returned from read()
-                try {
-                    bytes = BluetoothConnectionService.mmInStream.read(buffer);
-                    String incomingMessage = new String(buffer, 0, bytes);
-                    nabizLabel.setText("Nabziniz: "+incomingMessage);
-                    System.out.println(incomingMessage/*.concat(incomingMessage)*/);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+
+                    try {
+                        sleep(1000);
+                        try {
+                            bytes = BluetoothConnectionService.mmInStream.read(buffer);
+                            String incomingMessage = new String(buffer, 0, bytes);
+                            nabizLabel.setText("Nabziniz: " + incomingMessage);
+                            System.out.println(incomingMessage/*.concat(incomingMessage)*/);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
             }
+
         });
     }
 
