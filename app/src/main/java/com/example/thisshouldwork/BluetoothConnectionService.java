@@ -238,13 +238,14 @@ public class BluetoothConnectionService {
             byte[] buffer = new byte[1024];  // buffer store for the stream
             int bytes; // bytes returned from read()
             // Keep listening to the InputStream until an exception occurs
-            /*while (true) {*/
+           /* while (true) {*/
                 try {
                     sleep(1500);
                     try {
                         bytes = mmInStream.read(buffer);
                         String incomingMessage = new String(buffer,0, bytes);
                         Log.d(TAG, "InputStream: " + incomingMessage);
+
                     }
                     catch (IOException e) {
                         Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
@@ -254,8 +255,7 @@ public class BluetoothConnectionService {
                     throw new RuntimeException(e);
                 }
                 // Read from the InputStream
-
-           /* }*/
+           /*}*/
 
         }
 

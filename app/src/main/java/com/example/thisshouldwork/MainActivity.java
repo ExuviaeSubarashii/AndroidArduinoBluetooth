@@ -1,10 +1,11 @@
 package com.example.thisshouldwork;
 
-import static java.lang.Thread.getAllStackTraces;
 import static java.lang.Thread.sleep;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -21,7 +22,12 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.TypedArrayUtils;
+
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
@@ -31,10 +37,11 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -211,6 +218,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         drawGraphButton=findViewById(R.id.btnDrawGraph);
         nabizGraph.setDragEnabled(true);
         nabizGraph.setScaleEnabled(false);
+        btnStartConnection.setEnabled(false);
+        Objects.requireNonNull(getSupportActionBar()).hide();
         btnONOFF.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
             @Override
@@ -249,33 +258,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 leftAxis.enableGridDashedLine(10f,10f,0);
                 leftAxis.setDrawLimitLinesBehindData(true);
 
-                ArrayList<Integer> messagearray=new ArrayList<>();
+                ArrayList<Float> messagearray=new ArrayList<>();
                 ArrayList<ILineDataSet> dataSets=new ArrayList<>();
                 yValues.add(new Entry(0,0));
                 nabizGraph.getAxisRight().setEnabled(false);
                     try {
                         bytes = BluetoothConnectionService.mmInStream.read(buffer);
                         incomingMessage = new String(buffer, 0, bytes);
-                        for (int i=0; i<5;i++)
-                        {
-                            try
-                            {
-                                Integer g= Integer.parseInt(incomingMessage.trim());
+                            for (int i = 0; i < 5; i++) {
+
+                                Float g = Float.parseFloat(incomingMessage.trim());
                                 messagearray.add(g);
-                            } catch (NumberFormatException ex) {
-                                throw new RuntimeException(ex);
                             }
-                        }
-                            for (Integer ar:messagearray)
+                            for (Float ar : messagearray)
                             {
-                                yValues.add(new Entry(1,ar ));
+                                yValues.add(new Entry(1, ar));
                                 yValues.add(new Entry(2, ar));
                                 yValues.add(new Entry(3, ar));
                                 yValues.add(new Entry(4, ar));
-                                    /*yValues.add(new Entry(1,40 ));
-                                    yValues.add(new Entry(2, 20));
-                                    yValues.add(new Entry(3, 60));
-                                    yValues.add(new Entry(4, 100));*/
                             }
                         LineDataSet set1=new LineDataSet(yValues,"NabizGraph");
                         dataSets.add(set1);
@@ -286,7 +286,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         set1.setColor(Color.RED);
                         set1.setLineWidth(3f);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        /*throw new RuntimeException(e);*/
+                        /*finish();*/
+                        startActivity(getIntent());
+
                     }
             }
         });
@@ -306,23 +309,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onClick(View view) {
                 byte[] buffer = new byte[1024];  // buffer store for the stream
                 int bytes; // bytes returned from read()
-
-                    try {
-                        sleep(1000);
-                        try {
+                    try
+                    {
+                        try
+                        {
+                            nabizLabel.clearComposingText();
+                            sleep(1500);
                             bytes = BluetoothConnectionService.mmInStream.read(buffer);
                             String incomingMessage = new String(buffer, 0, bytes);
                             nabizLabel.setText("Nabziniz: " + incomingMessage);
-                            System.out.println(incomingMessage/*.concat(incomingMessage)*/);
+                            System.out.println(incomingMessage);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-
             }
-
         });
     }
 
@@ -340,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
         mBluetoothConnection.startClient(device,mDeviceUUIDs);
         isconnectedlabel.setText("Baglanti Basarili");
+        btnStartConnection.setEnabled(false);
     }
 
     @SuppressLint("MissingPermission")
@@ -439,6 +443,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             mBTDevice = mBTDevices.get(i);
             mDeviceUUIDs = mBTDevice.getUuids();
             mBluetoothConnection = new BluetoothConnectionService(MainActivity.this);
+            btnStartConnection.setEnabled(true);
         }
     }
 }
