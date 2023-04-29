@@ -17,10 +17,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
 
-/**
- * Created by User on 12/21/2016.
- */
-
 public class BluetoothConnectionService {
     private static final String TAG = "BluetoothConnectionServ";
 
